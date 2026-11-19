@@ -20,9 +20,13 @@ CREATE TABLE IF NOT EXISTS users (
   email         VARCHAR(255)  NOT NULL,
   password_hash VARCHAR(255)  NOT NULL,   -- hash only, never plain text
   role          ENUM('User', 'Admin') NOT NULL DEFAULT 'User',
+  is_active     TINYINT(1)    NOT NULL DEFAULT 1,   -- 1 = active, 0 = deactivated
   created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
                               ON UPDATE CURRENT_TIMESTAMP,
+  
+  
+                
 
   CONSTRAINT pk_users PRIMARY KEY (id),
   CONSTRAINT uq_users_email UNIQUE (email),
