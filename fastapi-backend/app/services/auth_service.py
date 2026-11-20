@@ -15,8 +15,19 @@ load_dotenv()
 # Password Hashing using Argon2id
 password_hash = PasswordHash.recommended()
 
-# JWT Configuration loaded from environment variables
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "fallback_secret_key_minimum_32_chars_long_for_security")
+# JWT Configuration loaded securely from environment variables (no hardcoded fallback)
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not JWT_SECRET_KEY or not JWT_SECRET_KEY.strip():
+    raise RuntimeError(
+        "CRITICAL CONFIGURATION ERROR: 'JWT_SECRET_KEY' environment variable is missing or empty. "
+        "Define a secure JWT_SECRET_KEY (minimum 32 characters) in your .env file."
+    )
+
+if len(JWT_SECRET_KEY.strip()) < 32:
+    raise RuntimeError(
+        "CRITICAL CONFIGURATION ERROR: 'JWT_SECRET_KEY' must be at least 32 characters long."
+    )
+
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
@@ -109,28 +120,6 @@ def register_user(db: Session, user_data: UserRegister) -> User:
         )
 
     return new_user
-
-
-def authenticate_user(db: Session, login_data: UserLogin) -> tuple[User, str]:
-    """Authenticates user credentials and issues a JWT token."""
-    email = str(login_data.email).lower().strip()
-    user = db.query(User).filter(User.email == email).first()
-
-    if not user or not verify_password(login_data.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    token_payload = {
-        "sub": str(user.id),
-        "email": user.email,
-        "role": user.role
-    }
-    access_token = create_access_token(data=token_payload)
-    return user, access_token
-
 
 
 def authenticate_user(db: Session, login_data: UserLogin) -> tuple[User, str]:
