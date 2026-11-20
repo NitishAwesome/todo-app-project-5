@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.dependencies.database import get_db
+from app.dependencies.auth import get_current_user
+from app.models.user import User
 from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse
 from app.services import task_service
 
@@ -11,20 +13,11 @@ router = APIRouter(
 )
 
 
-# Authentication integration point:
-# Replace this dependency with Rehan's get_current_user.
-def get_current_user():
-    raise HTTPException(
-        status_code=501,
-        detail="Authentication integration pending."
-    )
-
-
 @router.post("/", response_model=TaskResponse, status_code=201)
 def create_task(
     task_data: TaskCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     try:
         return task_service.create_task(
@@ -41,7 +34,7 @@ def get_tasks(
     priority: str | None = None,
     sort: str = Query("newest", pattern="^(newest|due_soon|priority_high)$"),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     if status and status not in ["Pending", "InProgress", "Completed"]:
         raise HTTPException(status_code=400, detail="Invalid status.")
@@ -58,7 +51,7 @@ def get_tasks(
 def get_task(
     task_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     task = task_service.get_task_by_id(
         db, task_id, current_user.id
@@ -75,7 +68,7 @@ def update_task(
     task_id: int,
     task_data: TaskUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     task = task_service.get_task_by_id(
         db, task_id, current_user.id
@@ -96,7 +89,7 @@ def update_task(
 def delete_task(
     task_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     task = task_service.get_task_by_id(
         db, task_id, current_user.id

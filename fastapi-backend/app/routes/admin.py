@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.dependencies.database import get_db
+from app.dependencies.auth import require_admin
 from app.models.task import Task
 from app.models.user import User
 
@@ -11,18 +12,10 @@ router = APIRouter(
 )
 
 
-# Replace with Rehan's actual require_admin dependency.
-def require_admin():
-    raise HTTPException(
-        status_code=501,
-        detail="Admin authentication integration pending."
-    )
-
-
 @router.get("/tasks")
 def get_all_tasks(
     db: Session = Depends(get_db),
-    admin=Depends(require_admin)
+    admin: User = Depends(require_admin)
 ):
     tasks = db.query(Task, User).join(
         User, Task.user_id == User.id
@@ -50,7 +43,7 @@ def get_all_tasks(
 @router.get("/stats")
 def get_admin_stats(
     db: Session = Depends(get_db),
-    admin=Depends(require_admin)
+    admin: User = Depends(require_admin)
 ):
     return {
         "total_users": db.query(User).count(),
