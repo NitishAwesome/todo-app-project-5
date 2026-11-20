@@ -1,0 +1,56 @@
+from sqlalchemy import (
+    Column, Integer, String, Text, Date, TIMESTAMP,
+    ForeignKey, ForeignKeyConstraint, Enum
+)
+from sqlalchemy.sql import func
+from app.database.base import Base
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    category_id = Column(Integer, nullable=True)
+
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+
+    status = Column(
+        Enum("Pending", "InProgress", "Completed"),
+        default="Pending",
+        nullable=False
+    )
+
+    priority = Column(
+        Enum("Low", "Medium", "High"),
+        default="Medium",
+        nullable=False
+    )
+
+    due_date = Column(Date, nullable=True)
+
+    created_at = Column(
+        TIMESTAMP,
+        server_default=func.current_timestamp()
+    )
+
+    updated_at = Column(
+        TIMESTAMP,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp()
+    )
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["category_id", "user_id"],
+            ["categories.id", "categories.user_id"],
+            name="fk_tasks_category_same_user"
+        ),
+    )
