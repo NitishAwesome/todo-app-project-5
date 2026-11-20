@@ -45,3 +45,5 @@ ehthumbs.db
 *.sqlite
 *.db
 
+
+.vscode/
