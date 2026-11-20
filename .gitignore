@@ -45,3 +45,9 @@ ehthumbs.db
 *.sqlite
 *.db
 
+
+# Python
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
