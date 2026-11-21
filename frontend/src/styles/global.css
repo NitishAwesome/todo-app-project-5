@@ -1,15 +1,156 @@
+/* Planova Design System — Smart Task Management */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
+  /* Primary Brand Colors (Planova Indigo) */
   --primary: #4f46e5;
-  --primary-dark: #4338ca;
-  --bg: #f5f7fb;
+  --primary-hover: #4338ca;
+  --primary-dark: #3730a3;
+  --primary-light: #eef2ff;
+  --primary-glow: rgba(79, 70, 229, 0.18);
+  --primary-subtle: #f5f7ff;
+
+  /* Accent & Status Colors */
+  --accent: #6366f1;
+  --success: #10b981;
+  --success-light: #ecfdf5;
+  --success-text: #065f46;
+  --warning: #f59e0b;
+  --warning-light: #fffbeb;
+  --warning-text: #92400e;
+  --danger: #ef4444;
+  --danger-light: #fef2f2;
+  --danger-text: #991b1b;
+  --info: #0284c7;
+  --info-light: #f0f9ff;
+
+  /* Surfaces & Backgrounds */
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --border: #e5e7eb;
+  --surface-hover: #f9fafb;
+  --surface-subtle: #f1f5f9;
+  --surface-active: #e2e8f0;
+
+  /* Neutral Typography */
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --muted: #64748b;
+  --text-light: #94a3b8;
+
+  /* Borders & Dividers */
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-focus: #6366f1;
+
+  /* Elevation Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(16, 24, 40, 0.08), 0 1px 2px -1px rgba(16, 24, 40, 0.08);
+  --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.08), 0 2px 4px -2px rgba(16, 24, 40, 0.04);
+  --shadow-lg: 0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
+  --shadow-xl: 0 20px 24px -4px rgba(16, 24, 40, 0.08), 0 8px 8px -4px rgba(16, 24, 40, 0.03);
+
+  /* Geometry & Layout */
+  --radius-sm: 6px;
   --radius: 10px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --navbar-height: 60px;
-  --sidebar-width: 220px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  --navbar-height: 70px;
+  --sidebar-width: 260px;
+
+  /* Typography Stack */
+  --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ========================================================
+   Step 7: Global Dark Mode System Tokens
+   ======================================================== */
+[data-theme="dark"] {
+  /* Primary Brand Colors */
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-dark: #818cf8;
+  --primary-light: rgba(99, 102, 241, 0.18);
+  --primary-glow: rgba(99, 102, 241, 0.28);
+  --primary-subtle: rgba(99, 102, 241, 0.12);
+
+  /* Status Colors */
+  --success-light: rgba(16, 185, 129, 0.16);
+  --success-text: #34d399;
+  --warning-light: rgba(245, 158, 11, 0.16);
+  --warning-text: #fbbf24;
+  --danger-light: rgba(239, 68, 68, 0.16);
+  --danger-text: #f87171;
+  --info-light: rgba(2, 132, 199, 0.16);
+
+  /* Surfaces & Backgrounds */
+  --bg: #0b0f19;
+  --surface: #131b2e;
+  --surface-hover: #1c2742;
+  --surface-subtle: #17223b;
+  --surface-active: #223053;
+
+  /* Neutral Typography */
+  --text: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --muted: #94a3b8;
+  --text-light: #64748b;
+
+  /* Borders & Dividers */
+  --border: #23314f;
+  --border-light: #1b263e;
+  --border-focus: #818cf8;
+
+  /* Elevation Shadows in Dark Mode */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 12px 16px -4px rgba(0, 0, 0, 0.8);
+  --shadow-xl: 0 20px 24px -4px rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="dark"] .sidebar-team-card {
+  background: linear-gradient(145deg, #17223b 0%, #1e1b4b 100%);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: var(--surface);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: #475569;
+}
+
+[data-theme="dark"] .workspace-empty-state {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .planova-task-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .task-status-select {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .action-icon-btn.edit {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .action-icon-btn.edit:hover {
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 * {
@@ -18,11 +159,18 @@
   padding: 0;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: var(--bg);
+  font-family: var(--font-family);
+  background-color: var(--bg);
   color: var(--text);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {
@@ -33,24 +181,205 @@ a {
 button {
   font-family: inherit;
   cursor: pointer;
+  border: none;
+  background: none;
 }
 
+input, select, textarea {
+  font-family: inherit;
+}
+
+/* Primary Planova Action Button */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: var(--primary);
   color: #ffffff;
-  border: none;
+  border: 1px solid transparent;
   padding: 10px 18px;
   border-radius: var(--radius);
-  font-size: 1rem;
+  font-size: 0.925rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2), 0 2px 4px rgba(79, 70, 229, 0.15);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn:hover {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px var(--primary-glow);
 }
 
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-subtle);
+  color: var(--text);
+  border-color: #cbd5e1;
+}
+
+/* Card Surface Utility */
 .card {
   background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Badge System */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.01em;
+}
+
+.badge-group {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+/* Focus outline accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+
+/* ========================================================
+   Step 8: Global Dark Mode Comprehensive Screen Overrides
+   ======================================================== */
+[data-theme="dark"] .tfm-modal {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xl);
+}
+
+[data-theme="dark"] .tfm-heading,
+[data-theme="dark"] .tfm-label {
+  color: var(--text);
+}
+
+[data-theme="dark"] .tfm-input,
+[data-theme="dark"] .tfm-select,
+[data-theme="dark"] .tfm-textarea {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .tfm-input:focus,
+[data-theme="dark"] .tfm-select:focus,
+[data-theme="dark"] .tfm-textarea:focus {
+  border-color: var(--primary);
+}
+
+/* Kanban in Dark Mode */
+[data-theme="dark"] .kanban-column {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .kanban-task-card {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .kanban-card-title {
+  color: var(--text);
+}
+
+/* Calendar in Dark Mode */
+[data-theme="dark"] .calendar-container,
+[data-theme="dark"] .calendar-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .cal-day-cell {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .cal-day-cell.other-month {
+  background: var(--surface-subtle);
+  opacity: 0.45;
+}
+
+[data-theme="dark"] .cal-day-num {
+  color: var(--text);
+}
+
+/* Admin Screens in Dark Mode */
+[data-theme="dark"] .admin-header,
+[data-theme="dark"] .admin-filter-bar,
+[data-theme="dark"] .admin-kpi-card,
+[data-theme="dark"] .admin-panel-card,
+[data-theme="dark"] .admin-table-container {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .admin-title,
+[data-theme="dark"] .admin-table th,
+[data-theme="dark"] .admin-table td,
+[data-theme="dark"] .admin-user-name,
+[data-theme="dark"] .admin-task-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .admin-table tr {
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .admin-table tr:hover {
+  background: var(--surface-subtle);
+}
+
+/* Task Workspace */
+[data-theme="dark"] .planova-task-toolbar {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .search-input-box input,
+[data-theme="dark"] .select-control-box select {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .task-title {
+  color: var(--text);
 }

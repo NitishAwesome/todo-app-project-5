@@ -1,0 +1,388 @@
+/* AdminUserManagement.css — Planova Admin User Management */
+
+.admin-user-mgmt-root {
+  width: 100%;
+}
+
+.user-mgmt-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  animation: um-pop 0.2s ease-out;
+}
+
+@keyframes um-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-mgmt-toast button {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+/* Header Card */
+.user-mgmt-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.user-mgmt-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-mgmt-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.badge-user-count {
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #6366f1;
+  background: #ede9fe;
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+
+.user-mgmt-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.885rem;
+  color: #64748b;
+}
+
+.user-mgmt-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.user-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 240px;
+}
+
+.user-search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.user-search-box input {
+  width: 100%;
+  padding: 9px 34px 9px 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: #0f172a;
+  transition: all 0.15s ease;
+}
+
+.user-search-box input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.user-role-select {
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.user-role-select:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+/* Table Card */
+.user-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.user-table-loading,
+.user-table-empty,
+.user-table-error {
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.user-table-empty h3 {
+  margin: 12px 0 4px;
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.user-table-empty p {
+  margin: 0;
+  font-size: 0.885rem;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.planova-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.planova-admin-table th {
+  background: #f8fafc;
+  padding: 12px 18px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.planova-admin-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.885rem;
+  color: #334155;
+}
+
+.planova-admin-table tbody tr:hover {
+  background: #fbfbfe;
+}
+
+.planova-admin-table tbody tr.row-current-user {
+  background: #f5f3ff;
+}
+
+.user-cell-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-avatar.avatar-admin {
+  background: #ede9fe;
+  color: #6366f1;
+}
+
+.user-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pill-you {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #6366f1;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.user-cell-email {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* Role Pills */
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 0.775rem;
+  font-weight: 700;
+}
+
+.role-admin {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+}
+
+.role-user {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.date-cell {
+  color: #64748b;
+  font-size: 0.825rem;
+}
+
+.task-metric-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-total {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.metric-completed {
+  font-size: 0.775rem;
+  color: #10b981;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Action Buttons */
+.btn-role-toggle {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-role-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-promote {
+  background: #ede9fe;
+  color: #6366f1;
+  border-color: #ddd6fe;
+}
+
+.btn-promote:hover:not(:disabled) {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.btn-demote {
+  background: #fff1f2;
+  color: #e11d48;
+  border-color: #fecdd3;
+}
+
+.btn-demote:hover:not(:disabled) {
+  background: #e11d48;
+  color: #ffffff;
+}
+
+/* Pagination */
+.table-pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-info {
+  font-size: 0.825rem;
+  color: #64748b;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-page {
+  padding: 6px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-page:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-current {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #334155;
+}

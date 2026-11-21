@@ -3,37 +3,58 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.auth import router as auth_router
 from app.routes.tasks import router as task_router
+from app.routes.categories import router as category_router
 from app.routes.admin import router as admin_router
+from app.routes.subtasks import router as subtask_router
+from app.routes.tags import router as tag_router
+from app.routes.reminders import router as reminder_router
+from app.routes.notifications import router as notification_router
+from app.routes.activity_logs import router as activity_log_router
+from app.routes.preferences import router as preference_router
 
 app = FastAPI(
-    title="To-Do Application API",
-    description="Backend APIs for task management and authentication",
-    version="1.0.0"
+    title="Planova Task Management API",
+    description="Backend APIs for task management, subtasks, tags, reminders, notifications, and administration",
+    version="2.0.0"
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
 
-# Rehan's Authentication APIs
+# Authentication APIs
 app.include_router(auth_router)
 
-# Mohanbabu's Task and Admin APIs
+# Task and Category Core APIs
 app.include_router(task_router)
+app.include_router(category_router)
+
+# Step 7 Smart Productivity APIs
+app.include_router(subtask_router)
+app.include_router(tag_router)
+app.include_router(reminder_router)
+app.include_router(notification_router)
+app.include_router(activity_log_router)
+app.include_router(preference_router)
+
+# Administrative APIs
 app.include_router(admin_router)
 
 
 @app.get("/", tags=["default"])
 def home():
     return {
-        "message": "To-Do FastAPI Backend is running!"
+        "message": "Planova FastAPI Backend is running!",
+        "version": "2.0.0",
     }
 
 

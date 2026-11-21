@@ -1,5 +1,14 @@
+import type { Subtask, Tag } from "./productivity";
+
 export type TaskStatus = "Pending" | "InProgress" | "Completed";
 export type TaskPriority = "Low" | "Medium" | "High";
+
+export interface Category {
+  id: number;
+  user_id: number;
+  name: string;
+  created_at?: string | null;
+}
 
 export interface Task {
   id: number;
@@ -12,6 +21,8 @@ export interface Task {
   due_date: string | null;
   created_at: string;
   updated_at: string;
+  subtasks?: Subtask[];
+  tags?: Tag[];
 }
 
 export interface CreateTaskRequest {
