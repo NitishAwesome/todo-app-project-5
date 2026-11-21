@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Layout from "./components/Layout";
 import TaskWorkspace from "./components/TaskWorkspace";
 import TaskFormModal from "./components/TaskFormModal";
 
@@ -31,8 +32,11 @@ function App() {
   };
 
   return (
-    <>
-      <button onClick={handleAdd}>Add Task</button>
+    <Layout>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h2>My Tasks Board</h2>
+        <button className="btn" onClick={handleAdd}>+ Add Task</button>
+      </div>
 
       <TaskWorkspace
         key={refreshKey}
@@ -46,7 +50,7 @@ function App() {
         onClose={handleClose}
         onSaved={handleSaved}
       />
-    </>
+    </Layout>
   );
 }
 
