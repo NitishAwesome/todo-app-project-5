@@ -7,6 +7,7 @@ from app.models.reminder import Reminder
 from app.models.notification import Notification
 from app.models.activity_log import TaskActivityLog
 from app.models.user_preference import UserPreference
+from app.models.team_task import TeamTask, TaskAssignment, AssignmentDiscussion
 
 __all__ = [
     "User",
@@ -19,4 +20,7 @@ __all__ = [
     "Notification",
     "TaskActivityLog",
     "UserPreference",
+    "TeamTask",
+    "TaskAssignment",
+    "AssignmentDiscussion",
 ]

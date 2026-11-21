@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, time, datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
@@ -19,6 +19,10 @@ def create_task(db: Session, task_data: TaskCreate, user_id: int):
         if not category:
             raise ValueError("Invalid category or category does not belong to you.")
 
+    due_dt = None
+    if task_data.due_date and task_data.due_time:
+        due_dt = datetime.combine(task_data.due_date, task_data.due_time)
+
     task = Task(
         user_id=user_id,
         category_id=task_data.category_id,
@@ -26,7 +30,10 @@ def create_task(db: Session, task_data: TaskCreate, user_id: int):
         description=task_data.description,
         status=task_data.status,
         priority=task_data.priority,
-        due_date=task_data.due_date
+        due_date=task_data.due_date,
+        due_time=task_data.due_time,
+        due_datetime=due_dt,
+        timezone=task_data.timezone or "UTC"
     )
 
     db.add(task)
@@ -132,6 +139,11 @@ def update_task(
                 action_type = "priority_changed"
 
             setattr(task, key, value)
+
+    if "due_date" in updates or "due_time" in updates:
+        d = task.due_date
+        t = task.due_time
+        task.due_datetime = datetime.combine(d, t) if (d and t) else None
 
     if changed:
         log = TaskActivityLog(

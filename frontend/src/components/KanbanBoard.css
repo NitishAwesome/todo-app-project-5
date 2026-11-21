@@ -419,3 +419,134 @@
     min-height: auto;
   }
 }
+
+/* ========================================================
+   DARK MODE ADAPTATION (Planova Design System)
+   ======================================================== */
+[data-theme="dark"] .kanban-header-bar {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .kanban-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .kanban-subtitle {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .kanban-search-input,
+[data-theme="dark"] .kanban-category-select {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .kanban-search-input:focus,
+[data-theme="dark"] .kanban-category-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .kanban-column {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .kanban-column.drag-over {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .kanban-column-header {
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .kanban-col-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .kanban-col-count {
+  background: var(--surface-active);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .kanban-add-col-btn {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .kanban-add-col-btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .kanban-empty-column {
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+[data-theme="dark"] .kanban-drop-hint {
+  color: var(--text-light);
+}
+
+[data-theme="dark"] .kanban-task-card {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .kanban-task-card:hover {
+  background: var(--surface-hover);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .kanban-card-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .kanban-card-desc {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .kanban-card-meta {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .kanban-card-actions {
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .move-label {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .kanban-move-box select {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .kanban-mini-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .kanban-mini-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: #64748b;
+}
+
+[data-theme="dark"] .kanban-mini-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}

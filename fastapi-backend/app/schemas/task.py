@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, time, datetime
 from typing import Literal
 from pydantic import BaseModel, Field, ConfigDict
 from app.schemas.subtask import SubtaskResponse
@@ -11,6 +11,9 @@ class TaskCreate(BaseModel):
     status: Literal["Pending", "InProgress", "Completed"] = "Pending"
     priority: Literal["Low", "Medium", "High"] = "Medium"
     due_date: date | None = None
+    due_time: time | None = None
+    due_datetime: datetime | None = None
+    timezone: str = "UTC"
     category_id: int | None = None
 
 
@@ -20,6 +23,9 @@ class TaskUpdate(BaseModel):
     status: Literal["Pending", "InProgress", "Completed"] | None = None
     priority: Literal["Low", "Medium", "High"] | None = None
     due_date: date | None = None
+    due_time: time | None = None
+    due_datetime: datetime | None = None
+    timezone: str | None = None
     category_id: int | None = None
 
 
@@ -34,6 +40,9 @@ class TaskResponse(BaseModel):
     status: str
     priority: str
     due_date: date | None
+    due_time: time | None = None
+    due_datetime: datetime | None = None
+    timezone: str = "UTC"
     created_at: datetime
     updated_at: datetime
     subtasks: list[SubtaskResponse] = []

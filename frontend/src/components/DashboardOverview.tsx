@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import type { Task, TaskStatus } from "../types/task";
+import type { TaskAssignment } from "../types/team";
 import { useAuth } from "../context/AuthContext";
 import "./DashboardOverview.css";
 
 interface DashboardOverviewProps {
   tasks: Task[];
+  assignedTasks?: TaskAssignment[];
   loading: boolean;
   error?: string;
   onAddTask: () => void;
@@ -12,11 +14,13 @@ interface DashboardOverviewProps {
   onStatusChange: (task: Task, status: TaskStatus) => void;
   onViewAll: () => void;
   onViewCompleted: () => void;
+  onViewAssignedTasks?: () => void;
   onRetry?: () => void;
 }
 
 export default function DashboardOverview({
   tasks,
+  assignedTasks = [],
   loading,
   error,
   onAddTask,
@@ -24,6 +28,7 @@ export default function DashboardOverview({
   onStatusChange,
   onViewAll,
   onViewCompleted,
+  onViewAssignedTasks,
   onRetry,
 }: DashboardOverviewProps) {
   const { user } = useAuth();
@@ -71,6 +76,22 @@ export default function DashboardOverview({
       lowPriority,
     };
   }, [tasks]);
+
+  // Statistics for Team Assignments (Option 4 Integration)
+  const assignedStats = useMemo(() => {
+    const list = assignedTasks || [];
+    const pending = list.filter((a) => a.status === "Pending").length;
+    const inProgress = list.filter((a) => a.status === "InProgress").length;
+    const completed = list.filter((a) => a.status === "Completed").length;
+    const active = pending + inProgress;
+    return {
+      total: list.length,
+      pending,
+      inProgress,
+      completed,
+      active,
+    };
+  }, [assignedTasks]);
 
   // Weekly Activity (Tasks created or completed across the past 7 days)
   const weeklyActivity = useMemo(() => {
@@ -176,9 +197,11 @@ export default function DashboardOverview({
           </h2>
           <p className="dash-hero-subtitle">
             {stats.total === 0
-              ? "Planova helps you organize smarter and achieve more. Start by creating your first task!"
+              ? assignedStats.total > 0
+                ? `You have ${assignedStats.active} active team assignment${assignedStats.active === 1 ? "" : "s"} assigned by your administrator.`
+                : "Planova helps you organize smarter and achieve more. Start by creating your first task!"
               : stats.completed === stats.total
-              ? "Incredible job! All tasks are completed. You're fully caught up!"
+              ? "Incredible job! All personal tasks are completed. You're fully caught up!"
               : `You have completed ${stats.completed} of ${stats.total} tasks (${stats.percent}%). Organize smarter, achieve more.`}
           </p>
         </div>
@@ -198,6 +221,66 @@ export default function DashboardOverview({
           </button>
         </div>
       </section>
+
+      {/* ========================================================
+          A2. TEAM ASSIGNMENT ALERT BANNER (Option 4 Integration)
+          ======================================================== */}
+      {assignedStats.total > 0 && (
+        <section
+          className="dash-assigned-banner"
+          onClick={onViewAssignedTasks}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if ((e.key === "Enter" || e.key === " ") && onViewAssignedTasks) {
+              onViewAssignedTasks();
+            }
+          }}
+          aria-label="View assigned team tasks"
+        >
+          <div className="dash-assigned-banner-left">
+            <div className="dash-assigned-icon-box">
+              <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.199l-.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+              </svg>
+            </div>
+            <div className="dash-assigned-info">
+              <div className="dash-assigned-pills">
+                <span className="dash-assigned-tag">Team Workspace</span>
+                <span className={`dash-assigned-active-pill ${assignedStats.active > 0 ? "is-active" : "is-done"}`}>
+                  {assignedStats.active > 0 ? `${assignedStats.active} Active` : "All Completed"}
+                </span>
+              </div>
+              <h4 className="dash-assigned-title">
+                {assignedStats.active > 0
+                  ? `You have ${assignedStats.active} active team assignment${assignedStats.active > 1 ? "s" : ""} assigned by administrators`
+                  : `All ${assignedStats.completed} assigned team tasks are completed!`}
+              </h4>
+              <p className="dash-assigned-desc">
+                {assignedStats.pending > 0 && <span>{assignedStats.pending} Pending &nbsp;·&nbsp; </span>}
+                {assignedStats.inProgress > 0 && <span>{assignedStats.inProgress} In Progress &nbsp;·&nbsp; </span>}
+                {assignedStats.completed > 0 && <span>{assignedStats.completed} Completed</span>}
+              </p>
+            </div>
+          </div>
+
+          <div className="dash-assigned-banner-right">
+            <button
+              type="button"
+              className="btn-dash-view-assigned"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onViewAssignedTasks) onViewAssignedTasks();
+              }}
+            >
+              <span>View Assigned Tasks ({assignedStats.total})</span>
+              <svg fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* ========================================================
           B. KPI STATISTICS CARDS

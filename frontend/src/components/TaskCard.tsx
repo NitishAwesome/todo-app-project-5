@@ -29,7 +29,8 @@ export default function TaskCard({
   // Calculate due date status (overdue, due today, due soon)
   const getDueStatus = () => {
     if (!task.due_date) return null;
-    if (isDone) return { type: "done", label: task.due_date.slice(0, 10) };
+    const timeSuffix = task.due_time ? ` at ${String(task.due_time).slice(0, 5)}` : "";
+    if (isDone) return { type: "done", label: `${task.due_date.slice(0, 10)}${timeSuffix}` };
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -44,14 +45,14 @@ export default function TaskCard({
     if (diffDays < 0) {
       return {
         type: "overdue",
-        label: `Overdue by ${Math.abs(diffDays)} ${Math.abs(diffDays) === 1 ? "day" : "days"}`,
+        label: `Overdue by ${Math.abs(diffDays)} ${Math.abs(diffDays) === 1 ? "day" : "days"}${timeSuffix}`,
       };
     } else if (diffDays === 0) {
-      return { type: "today", label: "Due Today" };
+      return { type: "today", label: `Due Today${timeSuffix}` };
     } else if (diffDays === 1) {
-      return { type: "soon", label: "Due Tomorrow" };
+      return { type: "soon", label: `Due Tomorrow${timeSuffix}` };
     }
-    return { type: "future", label: task.due_date.slice(0, 10) };
+    return { type: "future", label: `${task.due_date.slice(0, 10)}${timeSuffix}` };
   };
 
   const dueStatus = getDueStatus();

@@ -11,6 +11,7 @@ from app.routes.reminders import router as reminder_router
 from app.routes.notifications import router as notification_router
 from app.routes.activity_logs import router as activity_log_router
 from app.routes.preferences import router as preference_router
+from app.routes.team_tasks import router as team_task_router
 
 app = FastAPI(
     title="Planova Task Management API",
@@ -48,6 +49,9 @@ app.include_router(preference_router)
 
 # Administrative APIs
 app.include_router(admin_router)
+
+# Enterprise Team Collaboration & Task Assignments
+app.include_router(team_task_router)
 
 
 @app.get("/", tags=["default"])

@@ -1,0 +1,138 @@
+/* ==========================================================================
+   NotificationToast.css — In-App Real-Time Alert Popups
+   ========================================================================== */
+
+.planova-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 380px;
+  width: calc(100% - 48px);
+  pointer-events: none;
+}
+
+.planova-toast-item {
+  pointer-events: auto;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.planova-toast-item.toast-leave {
+  animation: toast-slide-out 0.25s ease forwards;
+}
+
+@keyframes toast-slide-out {
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+.planova-toast-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--primary, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.planova-toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.planova-toast-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.planova-toast-msg {
+  font-size: 0.84rem;
+  color: var(--muted, #64748b);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.planova-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.planova-toast-btn-action {
+  background: var(--primary, #6366f1);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.planova-toast-btn-action:hover {
+  background: var(--primary-hover, #4f46e5);
+}
+
+.planova-toast-close {
+  background: transparent;
+  border: none;
+  color: var(--muted, #64748b);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.planova-toast-close:hover {
+  background: var(--bg, #f1f5f9);
+  color: var(--text, #0f172a);
+}
+
+/* Dark mode */
+[data-theme="dark"] .planova-toast-item {
+  background: var(--surface, #1e293b);
+  border-color: var(--border, #334155);
+}
+
+[data-theme="dark"] .planova-toast-close:hover {
+  background: #0f172a;
+}

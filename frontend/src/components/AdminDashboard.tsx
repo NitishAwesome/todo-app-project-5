@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { adminApi } from "../adminAPI";
+import { teamApi } from "../teamAPI";
 import type { AdminStats } from "../types/admin";
+import type { TeamAnalytics } from "../types/team";
 import { useAuth } from "../context/AuthContext";
 import "./AdminDashboard.css";
 
@@ -8,15 +10,18 @@ interface AdminDashboardProps {
   onNavigateUsers: () => void;
   onNavigateTasks: () => void;
   onNavigatePersonal: () => void;
+  onNavigateAssignments?: () => void;
 }
 
 export default function AdminDashboard({
   onNavigateUsers,
   onNavigateTasks,
   onNavigatePersonal,
+  onNavigateAssignments,
 }: AdminDashboardProps) {
   const { user } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [teamAnalytics, setTeamAnalytics] = useState<TeamAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -24,8 +29,12 @@ export default function AdminDashboard({
     setLoading(true);
     setError("");
     try {
-      const data = await adminApi.getStats();
+      const [data, teamData] = await Promise.all([
+        adminApi.getStats(),
+        teamApi.getTeamAnalytics().catch(() => null),
+      ]);
       setStats(data);
+      setTeamAnalytics(teamData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load admin statistics");
     } finally {
@@ -409,6 +418,23 @@ export default function AdminDashboard({
           </div>
 
           <div className="admin-quick-links-box">
+            {onNavigateAssignments && (
+              <div className="quick-link-tile" onClick={onNavigateAssignments} style={{ borderColor: "var(--primary)" }}>
+                <div className="tile-icon-box" style={{ background: "rgba(99, 102, 241, 0.12)", color: "var(--primary)" }}>
+                  <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: "20px", height: "20px" }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.199l-.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="tile-title">Team Task Assignments</h3>
+                  <p className="tile-desc">
+                    {teamAnalytics ? `${teamAnalytics.active_assignments} in-progress assignments` : "Assign tasks & track members"}
+                  </p>
+                </div>
+                <span className="tile-arrow">&rarr;</span>
+              </div>
+            )}
+
             <div className="quick-link-tile" onClick={onNavigateUsers}>
               <div className="tile-icon-box">
                 <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: "20px", height: "20px" }}>

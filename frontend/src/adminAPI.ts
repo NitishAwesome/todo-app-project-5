@@ -60,12 +60,14 @@ export const adminApi = {
     role?: string;
     page?: number;
     page_size?: number;
+    limit?: number;
   }): Promise<AdminUserListResponse> => {
     const query = new URLSearchParams();
     if (params?.q) query.append("q", params.q);
     if (params?.role && params.role !== "all") query.append("role", params.role);
     if (params?.page) query.append("page", String(params.page));
-    if (params?.page_size) query.append("page_size", String(params.page_size));
+    const pageSize = params?.page_size || params?.limit || 100;
+    query.append("page_size", String(pageSize));
 
     const qs = query.toString();
     return await request<AdminUserListResponse>(`/api/admin/users${qs ? `?${qs}` : ""}`);
