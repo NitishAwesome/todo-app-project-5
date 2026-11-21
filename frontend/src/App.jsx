@@ -33,8 +33,11 @@ function App() {
 
   return (
     <Layout>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        <h2>My Tasks Board</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.2rem", flexWrap: "wrap", gap: "12px" }}>
+        <div>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1f2937", margin: 0 }}>My Tasks Board</h2>
+          <p style={{ color: "#6b7280", fontSize: "0.9rem", margin: "4px 0 0" }}>Manage, organize, and track your tasks</p>
+        </div>
         <button className="btn" onClick={handleAdd}>+ Add Task</button>
       </div>
 
