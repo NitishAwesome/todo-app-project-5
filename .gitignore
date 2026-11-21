@@ -49,3 +49,12 @@ venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Temporary Development Artifacts & Reports (Keep locally, exclude from Git)
+database/backups/
+docs/verification/
+task.md
+implementation_plan.md
+walkthrough.md
+*.tmp
+*.bak

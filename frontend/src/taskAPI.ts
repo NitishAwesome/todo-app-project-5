@@ -1,14 +1,16 @@
-import type { Task, CreateTaskRequest, UpdateTaskRequest } from "./types/task";
+import type { Task, CreateTaskRequest, UpdateTaskRequest, Category } from "./types/task";
+import { getStoredToken } from "./authAPI";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
-let mockTasks: Task[] = [
+// Optional fallback mock tasks strictly for offline reference or isolated unit tests
+export const DEMO_TASKS: Task[] = [
   {
     id: 1,
     user_id: 1,
     category_id: 1,
-    title: "Configure PostgreSQL / MySQL database tables",
-    description: "Verify schemas and seed initial task data.",
+    title: "Prepare quarterly budget presentation",
+    description: "Consolidate revenue projections and expense reports for the executive team.",
     status: "Pending",
     priority: "Low",
     due_date: "2026-11-28",
@@ -19,8 +21,8 @@ let mockTasks: Task[] = [
     id: 2,
     user_id: 1,
     category_id: 2,
-    title: "Connect frontend with backend API",
-    description: "Integrate task fetching, creation, and status updates with backend endpoints.",
+    title: "Finalize client contract proposal",
+    description: "Review deliverable scope, timelines, and terms with team leads.",
     status: "Pending",
     priority: "Medium",
     due_date: "2026-11-25",
@@ -54,18 +56,33 @@ let mockTasks: Task[] = [
 ];
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers as Record<string, string> || {}),
+  };
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers,
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("Authentication required or session expired. Please log in.");
+    }
+
     let message = `Request failed (${res.status})`;
     try {
       const body = await res.json();
-      if (typeof body.detail === "string") message = body.detail;
+      if (typeof body.detail === "string") {
+        message = body.detail;
+      } else if (Array.isArray(body.detail) && body.detail.length > 0) {
+        message = body.detail.map((d: { msg?: string }) => d.msg ?? "").filter(Boolean).join(", ");
+      }
     } catch {
-      // Keep the default message when the body is not JSON.
+      if (res.statusText) message = res.statusText;
     }
     throw new Error(message);
   }
@@ -76,67 +93,40 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const taskApi = {
   getAll: async (): Promise<Task[]> => {
-    try {
-      return await request<Task[]>("/api/tasks/");
-    } catch {
-      console.warn("Backend API unavailable. Displaying preview mock data.");
-      return [...mockTasks];
-    }
+    return await request<Task[]>("/api/tasks/");
   },
 
   getById: async (id: number): Promise<Task> => {
-    try {
-      return await request<Task>(`/api/tasks/${id}`);
-    } catch {
-      const found = mockTasks.find((t) => t.id === id);
-      if (!found) throw new Error("Task not found");
-      return found;
-    }
+    return await request<Task>(`/api/tasks/${id}`);
   },
 
   create: async (data: CreateTaskRequest): Promise<Task> => {
-    try {
-      return await request<Task>("/api/tasks/", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-    } catch {
-      const newTask: Task = {
-        id: Date.now(),
-        user_id: 1,
-        category_id: data.category_id ?? null,
-        title: data.title,
-        description: data.description ?? null,
-        status: data.status ?? "Pending",
-        priority: data.priority ?? "Medium",
-        due_date: data.due_date ?? null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      mockTasks.push(newTask);
-      return newTask;
-    }
+    return await request<Task>("/api/tasks/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 
   update: async (id: number, data: UpdateTaskRequest): Promise<Task> => {
-    try {
-      return await request<Task>(`/api/tasks/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      });
-    } catch {
-      const index = mockTasks.findIndex((t) => t.id === id);
-      if (index === -1) throw new Error("Task not found");
-      mockTasks[index] = { ...mockTasks[index], ...data, updated_at: new Date().toISOString() };
-      return mockTasks[index];
-    }
+    return await request<Task>(`/api/tasks/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
   },
 
   remove: async (id: number): Promise<void> => {
-    try {
-      await request<void>(`/api/tasks/${id}`, { method: "DELETE" });
-    } catch {
-      mockTasks = mockTasks.filter((t) => t.id !== id);
-    }
+    await request<void>(`/api/tasks/${id}`, { method: "DELETE" });
+  },
+};
+
+export const categoryApi = {
+  getAll: async (): Promise<Category[]> => {
+    return await request<Category[]>("/api/categories/");
+  },
+  create: async (name: string): Promise<Category> => {
+    return await request<Category>("/api/categories/", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    });
   },
 };

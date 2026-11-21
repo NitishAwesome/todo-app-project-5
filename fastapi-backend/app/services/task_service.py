@@ -1,8 +1,11 @@
+import json
+from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from app.models.task import Task
 from app.models.category import Category
+from app.models.activity_log import TaskActivityLog
 from app.schemas.task import TaskCreate, TaskUpdate
 
 
@@ -27,6 +30,22 @@ def create_task(db: Session, task_data: TaskCreate, user_id: int):
     )
 
     db.add(task)
+    db.flush()
+
+    # Record activity log
+    log = TaskActivityLog(
+        task_id=task.id,
+        actor_user_id=user_id,
+        action="created",
+        changed_fields=json.dumps({
+            "title": task.title,
+            "priority": task.priority,
+            "status": task.status,
+            "due_date": str(task.due_date) if task.due_date else None,
+        })
+    )
+    db.add(log)
+
     db.commit()
     db.refresh(task)
 
@@ -55,9 +74,7 @@ def get_user_tasks(
     if sort == "due_soon":
         query = query.order_by(Task.due_date.asc())
     elif sort == "priority_high":
-        query = query.order_by(
-            Task.priority.desc()
-        )
+        query = query.order_by(Task.priority.desc())
     else:
         query = query.order_by(Task.created_at.desc())
 
@@ -93,8 +110,37 @@ def update_task(
         if not category:
             raise ValueError("Invalid category or category does not belong to you.")
 
+    # Track changed fields for activity logging
+    changed = {}
+    action_type = "updated"
+
     for key, value in updates.items():
-        setattr(task, key, value)
+        old_val = getattr(task, key)
+        if old_val != value:
+            old_str = str(old_val) if isinstance(old_val, (date,)) else old_val
+            new_str = str(value) if isinstance(value, (date,)) else value
+            changed[key] = {"old": old_str, "new": new_str}
+
+            if key == "status":
+                if value == "Completed":
+                    action_type = "completed"
+                elif old_val == "Completed":
+                    action_type = "reopened"
+                else:
+                    action_type = "status_changed"
+            elif key == "priority" and action_type == "updated":
+                action_type = "priority_changed"
+
+            setattr(task, key, value)
+
+    if changed:
+        log = TaskActivityLog(
+            task_id=task.id,
+            actor_user_id=user_id,
+            action=action_type,
+            changed_fields=json.dumps(changed)
+        )
+        db.add(log)
 
     db.commit()
     db.refresh(task)

@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from typing import Literal
 from pydantic import BaseModel, Field, ConfigDict
+from app.schemas.subtask import SubtaskResponse
+from app.schemas.tag import TagResponse
 
 
 class TaskCreate(BaseModel):
@@ -34,3 +36,5 @@ class TaskResponse(BaseModel):
     due_date: date | None
     created_at: datetime
     updated_at: datetime
+    subtasks: list[SubtaskResponse] = []
+    tags: list[TagResponse] = []

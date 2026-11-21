@@ -2,6 +2,7 @@ from sqlalchemy import (
     Column, Integer, String, Text, Date, TIMESTAMP,
     ForeignKey, ForeignKeyConstraint, Enum
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database.base import Base
 
@@ -46,6 +47,9 @@ class Task(Base):
         server_default=func.current_timestamp(),
         onupdate=func.current_timestamp()
     )
+
+    subtasks = relationship("Subtask", cascade="all, delete-orphan", lazy="selectin")
+    tags = relationship("Tag", secondary="task_tags", lazy="selectin")
 
     __table_args__ = (
         ForeignKeyConstraint(
