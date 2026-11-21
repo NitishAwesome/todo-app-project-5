@@ -7,7 +7,7 @@
 
 CREATE DATABASE IF NOT EXISTS todo_app
   CHARACTER SET utf8mb4
-  COLLATE utf8mb4_0900_ai_ci;
+  COLLATE utf8mb4_unicode_ci;
 
 USE todo_app;
 
