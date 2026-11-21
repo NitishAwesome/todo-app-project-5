@@ -114,7 +114,6 @@ export default function TaskWorkspace({ onEdit }: TaskWorkspaceProps) {
 
   return (
     <section className="task-list">
-      <h2>My Tasks</h2>
       {actionError && <p className="error">{actionError}</p>}
 
       <TaskToolbar filters={filters} counts={counts} onChange={setFilters} />
