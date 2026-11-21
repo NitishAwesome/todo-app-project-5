@@ -1,0 +1,120 @@
+.tfm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.tfm-modal {
+  background: #ffffff;
+  color: #1f2937;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.tfm-heading {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+.tfm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.tfm-field label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.tfm-field input,
+.tfm-field textarea,
+.tfm-field select {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+  color: inherit;
+}
+
+.tfm-field input:focus,
+.tfm-field textarea:focus,
+.tfm-field select:focus {
+  outline: 2px solid #6366f1;
+  border-color: transparent;
+}
+
+.tfm-row {
+  display: flex;
+  gap: 12px;
+}
+
+.tfm-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.tfm-success {
+  color: #15803d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.tfm-banner {
+  margin-bottom: 12px;
+}
+
+.tfm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.tfm-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tfm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tfm-btn-primary {
+  background: #6366f1;
+  color: #fff;
+}
+
+.tfm-btn-secondary {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+@media (max-width: 480px) {
+  .tfm-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .tfm-modal {
+    padding: 18px;
+  }
+}
