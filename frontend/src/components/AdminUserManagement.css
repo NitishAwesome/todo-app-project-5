@@ -386,3 +386,142 @@
   font-weight: 600;
   color: #334155;
 }
+
+/* ========================================================
+   DARK MODE ADAPTATION (Planova Design System)
+   ======================================================== */
+[data-theme="dark"] .user-mgmt-header-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .user-mgmt-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .user-mgmt-subtitle {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .badge-account-count {
+  background: var(--primary-light);
+  color: #818cf8;
+}
+
+[data-theme="dark"] .user-search-box input,
+[data-theme="dark"] .user-role-filter select {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .user-search-box input:focus,
+[data-theme="dark"] .user-role-filter select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .user-search-box .search-icon {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .user-table-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .planova-admin-table thead tr {
+  background: var(--surface-subtle);
+}
+
+[data-theme="dark"] .planova-admin-table th {
+  color: var(--muted);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .planova-admin-table td {
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .planova-admin-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+[data-theme="dark"] .planova-admin-table tbody tr.row-current-user {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+[data-theme="dark"] .user-name-text {
+  color: var(--text);
+}
+
+[data-theme="dark"] .user-email-text {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .user-avatar-circle {
+  background: var(--surface-active);
+  color: var(--text);
+}
+
+[data-theme="dark"] .badge-role.admin {
+  background: var(--primary-light);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="dark"] .badge-role.user {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .btn-promote {
+  background: var(--primary-light);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="dark"] .btn-promote:hover:not(:disabled) {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn-demote {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="dark"] .btn-demote:hover:not(:disabled) {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .table-pagination-bar {
+  background: var(--surface-subtle);
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .pagination-info {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .btn-page {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-page:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: #64748b;
+}
+
+[data-theme="dark"] .page-current {
+  color: var(--text);
+}

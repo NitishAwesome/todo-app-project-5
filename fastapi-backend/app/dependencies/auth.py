@@ -63,3 +63,6 @@ def require_admin(
             detail="Admin privileges required"
         )
     return current_user
+
+
+get_current_admin = require_admin

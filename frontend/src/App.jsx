@@ -10,9 +10,13 @@ import TaskCalendar from "./components/TaskCalendar";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminUserManagement from "./components/AdminUserManagement";
 import AdminTaskOverview from "./components/AdminTaskOverview";
+import AdminTaskAssignments from "./components/AdminTaskAssignments";
+import UserAssignedTasks from "./components/UserAssignedTasks";
+import NotificationToast from "./components/NotificationToast";
 import SettingsView from "./components/SettingsView";
 import AuthView from "./components/AuthView";
 import { taskApi } from "./taskAPI";
+import { teamApi } from "./teamAPI";
 import { preferenceApi } from "./productivityAPI";
 
 function getInitialRoute() {
@@ -106,6 +110,7 @@ function AuthenticatedApp({ onNavigateHome }) {
 
   // Dashboard tasks data state (fetched from real FastAPI backend)
   const [dashTasks, setDashTasks] = useState([]);
+  const [dashAssignments, setDashAssignments] = useState([]);
   const [dashLoading, setDashLoading] = useState(true);
   const [dashError, setDashError] = useState("");
 
@@ -114,8 +119,12 @@ function AuthenticatedApp({ onNavigateHome }) {
     setDashLoading(true);
     setDashError("");
     try {
-      const data = await taskApi.getAll();
+      const [data, assignments] = await Promise.all([
+        taskApi.getAll(),
+        teamApi.getMyAssignedTasks().catch(() => []),
+      ]);
       setDashTasks(data);
+      setDashAssignments(assignments);
     } catch (err) {
       setDashError(err instanceof Error ? err.message : "Failed to load dashboard tasks");
     } finally {
@@ -229,6 +238,7 @@ function AuthenticatedApp({ onNavigateHome }) {
         <AdminDashboard
           onNavigateUsers={() => setActiveTab("admin-users")}
           onNavigateTasks={() => setActiveTab("admin-tasks")}
+          onNavigateAssignments={() => setActiveTab("admin-assignments")}
           onNavigatePersonal={() => setActiveTab("dashboard")}
         />
       )}
@@ -243,12 +253,18 @@ function AuthenticatedApp({ onNavigateHome }) {
         <AdminTaskOverview />
       )}
 
+      {/* Admin Tab 4: Team Task Assignments */}
+      {activeTab === "admin-assignments" && isAdmin && (
+        <AdminTaskAssignments />
+      )}
+
       {/* ================= PERSONAL WORKSPACE VIEWS ================= */}
 
       {/* Tab 1: Real User Dashboard & Analytics */}
       {activeTab === "dashboard" && (
         <DashboardOverview
           tasks={dashTasks}
+          assignedTasks={dashAssignments}
           loading={dashLoading}
           error={dashError}
           onAddTask={() => handleAdd()}
@@ -256,6 +272,7 @@ function AuthenticatedApp({ onNavigateHome }) {
           onStatusChange={handleDashboardStatusChange}
           onViewAll={() => setActiveTab("tasks")}
           onViewCompleted={() => setActiveTab("completed")}
+          onViewAssignedTasks={() => setActiveTab("assigned-to-me")}
           onRetry={loadDashboardTasks}
         />
       )}
@@ -327,6 +344,7 @@ function AuthenticatedApp({ onNavigateHome }) {
           key={`calendar-${refreshKey}`}
           onEdit={handleEdit}
           onAddTaskOnDate={(dateStr) => handleAdd({ dueDate: dateStr })}
+          onViewAssignment={() => setActiveTab("assigned-to-me")}
         />
       )}
 
@@ -384,10 +402,26 @@ function AuthenticatedApp({ onNavigateHome }) {
         </>
       )}
 
+      {/* Tab: Assigned to Me (Enterprise Team Collaboration) */}
+      {activeTab === "assigned-to-me" && (
+        <UserAssignedTasks onTasksChanged={handleSaved} />
+      )}
+
       {/* Tab 6: Settings & Preferences (Step 7) */}
       {activeTab === "settings" && (
         <SettingsView />
       )}
+
+      {/* Real-time Notification Popups */}
+      <NotificationToast
+        onNavigateToTask={(taskId, assignmentId) => {
+          if (assignmentId) {
+            setActiveTab("assigned-to-me");
+          } else if (taskId) {
+            handleNotificationClick(taskId);
+          }
+        }}
+      />
 
       {/* Add / Edit Task Modal (Sanyukta & Step 7 Smart Features) */}
       <TaskFormModal

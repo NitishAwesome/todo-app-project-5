@@ -22,6 +22,7 @@ const taskSchema = z.object({
     .optional(),
   priority: z.enum(["Low", "Medium", "High"]),
   due_date: z.string().optional(),
+  due_time: z.string().optional(),
   status: z.enum(["Pending", "InProgress", "Completed"]),
 });
 
@@ -43,6 +44,7 @@ const emptyValues: FormValues = {
   category_id: null,
   priority: "Medium",
   due_date: "",
+  due_time: "",
   status: "Pending",
 };
 
@@ -65,6 +67,7 @@ function toFormValues(task?: Task | null): FormValues {
     category_id: task.category_id ?? null,
     priority: task.priority,
     due_date: task.due_date ? task.due_date.slice(0, 10) : "",
+    due_time: task.due_time ? String(task.due_time).slice(0, 5) : "",
     status: task.status,
   };
 }
@@ -354,6 +357,7 @@ export default function TaskFormModal({
       category_id: parsedCategoryId,
       priority: values.priority,
       due_date: values.due_date ? values.due_date : null,
+      due_time: values.due_time ? (values.due_time.length === 5 ? `${values.due_time}:00` : values.due_time) : null,
     };
 
     try {
@@ -654,17 +658,31 @@ export default function TaskFormModal({
               </div>
             </div>
 
-            {/* Due Date */}
-            <div className="tfm-group">
-              <label htmlFor="tfm-due-date" className="tfm-label">
-                Due Date
-              </label>
-              <input
-                id="tfm-due-date"
-                type="date"
-                className="tfm-input"
-                {...register("due_date")}
-              />
+            {/* Due Date & Exact Due Time */}
+            <div className="tfm-row-2">
+              <div className="tfm-group">
+                <label htmlFor="tfm-due-date" className="tfm-label">
+                  Due Date
+                </label>
+                <input
+                  id="tfm-due-date"
+                  type="date"
+                  className="tfm-input"
+                  {...register("due_date")}
+                />
+              </div>
+
+              <div className="tfm-group">
+                <label htmlFor="tfm-due-time" className="tfm-label">
+                  Due Time <span className="tfm-optional">(Optional)</span>
+                </label>
+                <input
+                  id="tfm-due-time"
+                  type="time"
+                  className="tfm-input"
+                  {...register("due_time")}
+                />
+              </div>
             </div>
 
             {/* Quick Tag Selector in Add Mode */}

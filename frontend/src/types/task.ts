@@ -19,6 +19,9 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   due_date: string | null;
+  due_time?: string | null;
+  due_datetime?: string | null;
+  timezone?: string | null;
   created_at: string;
   updated_at: string;
   subtasks?: Subtask[];
@@ -32,6 +35,9 @@ export interface CreateTaskRequest {
   status?: TaskStatus;
   priority?: TaskPriority;
   due_date?: string | null;
+  due_time?: string | null;
+  due_datetime?: string | null;
+  timezone?: string | null;
 }
 
 export type UpdateTaskRequest = Partial<CreateTaskRequest>;

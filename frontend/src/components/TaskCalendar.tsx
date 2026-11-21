@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { taskApi, categoryApi } from "../taskAPI";
+import { teamApi } from "../teamAPI";
 import type { Task, Category } from "../types/task";
+import type { TaskAssignment } from "../types/team";
 import "./TaskCalendar.css";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -8,10 +10,12 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 interface TaskCalendarProps {
   onEdit: (task: Task) => void;
   onAddTaskOnDate?: (dateStr: string) => void;
+  onViewAssignment?: (assignmentId: number) => void;
 }
 
-export default function TaskCalendar({ onEdit, onAddTaskOnDate }: TaskCalendarProps) {
+export default function TaskCalendar({ onEdit, onAddTaskOnDate, onViewAssignment }: TaskCalendarProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [assignments, setAssignments] = useState<TaskAssignment[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,12 +31,14 @@ export default function TaskCalendar({ onEdit, onAddTaskOnDate }: TaskCalendarPr
     setLoading(true);
     setError("");
     try {
-      const [fetchedTasks, fetchedCategories] = await Promise.all([
+      const [fetchedTasks, fetchedCategories, fetchedAssignments] = await Promise.all([
         taskApi.getAll(),
         categoryApi.getAll().catch(() => [] as Category[]),
+        teamApi.getMyAssignedTasks().catch(() => [] as TaskAssignment[]),
       ]);
       setTasks(fetchedTasks);
       setCategories(fetchedCategories);
+      setAssignments(fetchedAssignments);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load calendar tasks");
     } finally {
@@ -82,10 +88,31 @@ export default function TaskCalendar({ onEdit, onAddTaskOnDate }: TaskCalendarPr
     return map;
   }, [tasks]);
 
+  // Map team assignments by date string "YYYY-MM-DD" (Option 2 Integration)
+  const assignmentsByDate = useMemo(() => {
+    const map: Record<string, TaskAssignment[]> = {};
+    for (const a of assignments) {
+      const dateVal = a.task_due_date || (a.task_due_datetime ? a.task_due_datetime.slice(0, 10) : null);
+      if (dateVal) {
+        const dStr = dateVal.slice(0, 10);
+        if (!map[dStr]) {
+          map[dStr] = [];
+        }
+        map[dStr].push(a);
+      }
+    }
+    return map;
+  }, [assignments]);
+
   // Unscheduled tasks (tasks with no due date)
   const unscheduledTasks = useMemo(() => {
     return tasks.filter((t) => !t.due_date);
   }, [tasks]);
+
+  // Unscheduled team assignments
+  const unscheduledAssignments = useMemo(() => {
+    return assignments.filter((a) => !a.task_due_date && !a.task_due_datetime);
+  }, [assignments]);
 
   // Calculate calendar days grid (including padding from previous & next months)
   const calendarDays = useMemo(() => {
@@ -228,6 +255,8 @@ export default function TaskCalendar({ onEdit, onAddTaskOnDate }: TaskCalendarPr
           <div className="calendar-days-grid" role="grid">
             {calendarDays.map((cell) => {
               const dayTasks = tasksByDate[cell.dateStr] || [];
+              const dayAssignments = assignmentsByDate[cell.dateStr] || [];
+              const totalItems = dayTasks.length + dayAssignments.length;
 
               return (
                 <div
@@ -258,11 +287,12 @@ export default function TaskCalendar({ onEdit, onAddTaskOnDate }: TaskCalendarPr
 
                   {/* Tasks on this day */}
                   <div className="cell-tasks-list">
-                    {dayTasks.slice(0, 3).map((task) => {
+                    {/* 1. Personal Tasks */}
+                    {dayTasks.slice(0, 2).map((task) => {
                       const isCompleted = task.status === "Completed";
                       return (
                         <button
-                          key={task.id}
+                          key={`task-${task.id}`}
                           type="button"
                           className={`cal-task-pill ${
                             isCompleted ? "pill-completed" : `pill-${task.priority.toLowerCase()}`
@@ -280,9 +310,35 @@ export default function TaskCalendar({ onEdit, onAddTaskOnDate }: TaskCalendarPr
                       );
                     })}
 
-                    {dayTasks.length > 3 && (
+                    {/* 2. Team Assigned Tasks (Option 2 Integration) */}
+                    {dayAssignments.slice(0, 2).map((assignment) => {
+                      const isCompleted = assignment.status === "Completed";
+                      return (
+                        <button
+                          key={`assign-${assignment.id}`}
+                          type="button"
+                          className={`cal-task-pill cal-task-pill-assigned ${
+                            isCompleted ? "pill-completed" : "pill-team-assigned"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onViewAssignment) {
+                              onViewAssignment(assignment.id);
+                            }
+                          }}
+                          title={`[Assigned by ${assignment.admin_name || "Admin"}] ${assignment.task_title || "Team Task"} (${assignment.status})${assignment.task_due_time ? " at " + assignment.task_due_time : ""}`}
+                          aria-label={`View assigned task ${assignment.task_title}`}
+                        >
+                          <span className="cal-task-dot cal-dot-assigned" aria-hidden="true" />
+                          <span className="cal-assigned-tag">Assigned</span>
+                          <span className="cal-task-text">{assignment.task_title}</span>
+                        </button>
+                      );
+                    })}
+
+                    {totalItems > 3 && (
                       <span className="cal-more-chip">
-                        +{dayTasks.length - 3} more
+                        +{totalItems - 3} more
                       </span>
                     )}
                   </div>
@@ -296,41 +352,73 @@ export default function TaskCalendar({ onEdit, onAddTaskOnDate }: TaskCalendarPr
         <aside className="calendar-unscheduled-sidebar" aria-label="Unscheduled tasks">
           <div className="sidebar-header-row">
             <h3 className="unscheduled-title">Unscheduled Tasks</h3>
-            <span className="unscheduled-count">{unscheduledTasks.length}</span>
+            <span className="unscheduled-count">
+              {unscheduledTasks.length + unscheduledAssignments.length}
+            </span>
           </div>
           <p className="unscheduled-desc">
-            Tasks without a due date. Click any task to assign a deadline.
+            Tasks without a due date. Click any task to assign a deadline or view details.
           </p>
 
           <div className="unscheduled-list">
-            {unscheduledTasks.length === 0 ? (
+            {unscheduledTasks.length === 0 && unscheduledAssignments.length === 0 ? (
               <p className="no-unscheduled-text">All tasks have deadlines assigned!</p>
             ) : (
-              unscheduledTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="unscheduled-item"
-                  onClick={() => onEdit(task)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      onEdit(task);
-                    }
-                  }}
-                  title="Click to set due date"
-                >
-                  <div className="unscheduled-item-top">
-                    <span className="unscheduled-item-title">{task.title}</span>
-                    <span
-                      className={`badge-pill badge-priority badge-priority-${task.priority.toLowerCase()}`}
-                    >
-                      {task.priority}
+              <>
+                {/* Unscheduled Assigned Team Tasks */}
+                {unscheduledAssignments.map((assignment) => (
+                  <div
+                    key={`unscheduled-assign-${assignment.id}`}
+                    className="unscheduled-item unscheduled-assigned-item"
+                    onClick={() => onViewAssignment && onViewAssignment(assignment.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if ((e.key === "Enter" || e.key === " ") && onViewAssignment) {
+                        onViewAssignment(assignment.id);
+                      }
+                    }}
+                    title="Click to view assigned team task"
+                  >
+                    <div className="unscheduled-item-top">
+                      <span className="unscheduled-item-title">{assignment.task_title}</span>
+                      <span className="badge-pill badge-assigned-pill">
+                        Assigned
+                      </span>
+                    </div>
+                    <span className="unscheduled-hint unscheduled-assigned-hint">
+                      Assigned by {assignment.admin_name || "Admin"} · View details →
                     </span>
                   </div>
-                  <span className="unscheduled-hint">+ Add due date</span>
-                </div>
-              ))
+                ))}
+
+                {/* Unscheduled Personal Tasks */}
+                {unscheduledTasks.map((task) => (
+                  <div
+                    key={`unscheduled-task-${task.id}`}
+                    className="unscheduled-item"
+                    onClick={() => onEdit(task)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        onEdit(task);
+                      }
+                    }}
+                    title="Click to set due date"
+                  >
+                    <div className="unscheduled-item-top">
+                      <span className="unscheduled-item-title">{task.title}</span>
+                      <span
+                        className={`badge-pill badge-priority badge-priority-${task.priority.toLowerCase()}`}
+                      >
+                        {task.priority}
+                      </span>
+                    </div>
+                    <span className="unscheduled-hint">+ Add due date</span>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </aside>

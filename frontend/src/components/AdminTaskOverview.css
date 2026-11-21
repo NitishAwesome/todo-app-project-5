@@ -194,3 +194,108 @@
   font-size: 0.8rem;
   color: #64748b;
 }
+
+/* ========================================================
+   DARK MODE ADAPTATION (Planova Design System)
+   ======================================================== */
+[data-theme="dark"] .task-overview-header-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .task-overview-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .task-overview-subtitle {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .badge-task-count {
+  background: var(--primary-light);
+  color: #818cf8;
+}
+
+[data-theme="dark"] .task-search-box input,
+[data-theme="dark"] .filter-select {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .task-search-box input:focus,
+[data-theme="dark"] .filter-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .task-search-box .search-icon {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .task-table-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .planova-admin-table thead tr {
+  background: var(--surface-subtle);
+}
+
+[data-theme="dark"] .planova-admin-table th {
+  color: var(--muted);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .planova-admin-table td {
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .planova-admin-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+[data-theme="dark"] .task-cell-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .task-cell-title.is-done {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .task-cell-desc {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .owner-name {
+  color: var(--text);
+}
+
+[data-theme="dark"] .owner-email {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .due-date-cell {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .due-date-cell.is-overdue {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="dark"] .created-date-cell {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .task-table-empty h3 {
+  color: var(--text);
+}
+
+[data-theme="dark"] .task-table-empty p {
+  color: var(--muted);
+}

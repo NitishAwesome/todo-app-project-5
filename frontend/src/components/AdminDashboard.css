@@ -552,3 +552,132 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ========================================================
+   DARK MODE ADAPTATION (Planova Design System)
+   ======================================================== */
+[data-theme="dark"] .admin-header-card {
+  background: linear-gradient(135deg, #131b2e 0%, #17223b 100%);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .admin-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .admin-subtitle {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .badge-admin-crown {
+  background: var(--primary-light);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="dark"] .admin-kpi-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .admin-kpi-card:hover {
+  background: var(--surface-hover);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="dark"] .kpi-label {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .kpi-value {
+  color: var(--text);
+}
+
+[data-theme="dark"] .admin-panel-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .panel-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .panel-subtitle {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .btn-panel-action:hover {
+  background: var(--primary-light);
+}
+
+[data-theme="dark"] .ring-bg {
+  stroke: var(--surface-subtle);
+}
+
+[data-theme="dark"] .ring-percent {
+  color: var(--text);
+}
+
+[data-theme="dark"] .ring-caption {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .breakdown-name {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .breakdown-count {
+  color: var(--text);
+}
+
+[data-theme="dark"] .progress-bar-bg {
+  background: var(--surface-subtle);
+}
+
+[data-theme="dark"] .priority-count-meta {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .priority-badge-pill.pill-low {
+  background: rgba(99, 102, 241, 0.2);
+  color: #c7d2fe;
+}
+
+[data-theme="dark"] .priority-badge-pill.pill-med {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+}
+
+[data-theme="dark"] .priority-badge-pill.pill-high {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .admin-quick-links-box {
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .quick-link-tile {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .quick-link-tile:hover {
+  background: var(--surface-hover);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="dark"] .tile-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .tile-desc {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .tile-arrow {
+  color: #818cf8;
+}

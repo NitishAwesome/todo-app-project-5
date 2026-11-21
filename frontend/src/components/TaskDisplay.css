@@ -762,3 +762,176 @@
 .task-subtasks-indicator.all-done .subtasks-mini-fill {
   background: var(--success);
 }
+
+/* ========================================================
+   DARK MODE ADAPTATION (Planova Design System)
+   ======================================================== */
+[data-theme="dark"] .planova-task-toolbar {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .task-status-tabs {
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .status-tab-btn {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .status-tab-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: #3b82f6;
+}
+
+[data-theme="dark"] .status-tab-btn.active {
+  background: var(--primary-light);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="dark"] .tab-count-badge {
+  background: var(--surface-active);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .status-tab-btn.active .tab-count-badge {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .search-input-box input,
+[data-theme="dark"] .select-control-box select,
+[data-theme="dark"] .select-control-box.sort-box select {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .search-input-box input:focus,
+[data-theme="dark"] .select-control-box select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .search-input-box .search-icon {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .clear-search-btn {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .clear-search-btn:hover {
+  color: var(--text);
+}
+
+[data-theme="dark"] .active-filters-bar {
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .filter-chip {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+}
+
+[data-theme="dark"] .filter-chip button {
+  color: #c7d2fe;
+}
+
+[data-theme="dark"] .filter-chip button:hover {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .planova-task-card {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .planova-task-card:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.5);
+  background: var(--surface-hover);
+}
+
+[data-theme="dark"] .planova-task-card.is-completed {
+  background: #111a2e;
+  border-color: #1e293b;
+  opacity: 0.82;
+}
+
+[data-theme="dark"] .task-title {
+  color: var(--text);
+}
+
+[data-theme="dark"] .planova-task-card.is-completed .task-title {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .task-checkbox {
+  background: var(--surface-subtle);
+  border-color: #475569;
+}
+
+[data-theme="dark"] .task-checkbox:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .task-description {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .task-meta-line {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .task-status-select {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .action-icon-btn {
+  background: var(--surface-subtle);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .action-icon-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: #64748b;
+}
+
+[data-theme="dark"] .action-icon-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .subtasks-preview-section {
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .subtask-mini-item {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .workspace-empty-state {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .workspace-empty-state h3 {
+  color: var(--text);
+}
+
+[data-theme="dark"] .workspace-empty-state p {
+  color: var(--muted);
+}

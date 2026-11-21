@@ -30,6 +30,9 @@ export interface Notification {
   id: number;
   user_id: number;
   task_id?: number | null;
+  assignment_id?: number | null;
+  action_url?: string | null;
+  actor_name?: string | null;
   title: string;
   message: string;
   type: string;

@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, Date, TIMESTAMP,
+    Column, Integer, String, Text, Date, Time, DateTime, TIMESTAMP,
     ForeignKey, ForeignKeyConstraint, Enum
 )
 from sqlalchemy.orm import relationship
@@ -36,6 +36,9 @@ class Task(Base):
     )
 
     due_date = Column(Date, nullable=True)
+    due_time = Column(Time, nullable=True)
+    due_datetime = Column(DateTime, nullable=True)
+    timezone = Column(String(50), default="UTC", nullable=False)
 
     created_at = Column(
         TIMESTAMP,
