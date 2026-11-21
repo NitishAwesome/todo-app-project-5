@@ -58,36 +58,3 @@ def get_me(
     current_user: User = Depends(get_current_user)
 ):
     return current_user
-
-
-
-@router.post(
-    "/login",
-    response_model=TokenResponse,
-    status_code=status.HTTP_200_OK,
-    summary="User Login",
-    description="Authenticates user credentials and returns a signed JWT access token."
-)
-def login(
-    login_data: UserLogin,
-    db: Session = Depends(get_db)
-):
-    user, access_token = authenticate_user(db, login_data)
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": user
-    }
-
-
-@router.get(
-    "/me",
-    response_model=UserResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Get current user profile",
-    description="Returns profile information for the authenticated user using the Bearer token."
-)
-def get_me(
-    current_user: User = Depends(get_current_user)
-):
-    return current_user
