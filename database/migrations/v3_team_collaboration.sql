@@ -5,10 +5,9 @@
 SET FOREIGN_KEY_CHECKS=0;
 
 -- 1. Extend tasks table with exact due time and timezone (preserving existing records)
-ALTER TABLE tasks 
-  ADD COLUMN IF NOT EXISTS due_time TIME NULL AFTER due_date,
-  ADD COLUMN IF NOT EXISTS due_datetime DATETIME NULL AFTER due_time,
-  ADD COLUMN IF NOT EXISTS timezone VARCHAR(50) NOT NULL DEFAULT 'UTC' AFTER due_datetime;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS due_time TIME NULL AFTER due_date;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS due_datetime DATETIME NULL AFTER due_time;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS timezone VARCHAR(50) NOT NULL DEFAULT 'UTC' AFTER due_datetime;
 
 -- 2. Create team_tasks table (Shared task definition created by Admins)
 CREATE TABLE IF NOT EXISTS team_tasks (
@@ -69,10 +68,9 @@ CREATE TABLE IF NOT EXISTS assignment_discussions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. Extend notifications table with assignment link, action URL, and actor name
-ALTER TABLE notifications
-  ADD COLUMN IF NOT EXISTS assignment_id INT NULL AFTER task_id,
-  ADD COLUMN IF NOT EXISTS action_url VARCHAR(255) NULL AFTER message,
-  ADD COLUMN IF NOT EXISTS actor_name VARCHAR(100) NULL AFTER action_url,
-  ADD CONSTRAINT fk_notif_assignment FOREIGN KEY (assignment_id) REFERENCES task_assignments(id) ON DELETE CASCADE;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS assignment_id INT NULL AFTER task_id;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS action_url VARCHAR(255) NULL AFTER message;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS actor_name VARCHAR(100) NULL AFTER action_url;
+ALTER TABLE notifications ADD CONSTRAINT fk_notif_assignment FOREIGN KEY (assignment_id) REFERENCES task_assignments(id) ON DELETE CASCADE;
 
 SET FOREIGN_KEY_CHECKS=1;

@@ -1,28 +1,92 @@
 """
 Planova Demo Data Seeder
-Populates a fresh or existing database with:
+Populates a fresh or existing database (local MySQL or TiDB Cloud) with:
 - 1 Admin account (admin@example.com)
 - 6 Group 5 Team Member accounts (password123 for all)
 - Categories, Tags, and Personal Tasks
 - 1 Enterprise Shared Team Task assigned to team members
+- Idempotent and safe to run multiple times.
 """
 
 import os
 import sys
-from datetime import date, datetime, timedelta
+import argparse
+from datetime import date, datetime, timedelta, time
 
 # Add fastapi-backend root to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+BASE_BACKEND = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if BASE_BACKEND not in sys.path:
+    sys.path.append(BASE_BACKEND)
 
 from dotenv import load_dotenv
 
-env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.env"))
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-else:
-    load_dotenv()
+parser = argparse.ArgumentParser(description="Planova Demo Data Seeder")
+parser.add_argument("--env", type=str, default=None, help="Path to environment file (e.g. .env.tidb)")
+args, _ = parser.parse_known_args()
 
-from app.database.session import SessionLocal
+target_env = None
+if args.env:
+    target_env = args.env if os.path.isabs(args.env) else os.path.abspath(os.path.join(os.getcwd(), args.env))
+else:
+    tidb_candidate = os.path.join(BASE_BACKEND, ".env.tidb")
+    local_candidate = os.path.join(BASE_BACKEND, ".env")
+    if os.path.exists(tidb_candidate):
+        target_env = tidb_candidate
+    elif os.path.exists(local_candidate):
+        target_env = local_candidate
+
+if target_env and os.path.exists(target_env):
+    load_dotenv(target_env, override=True)
+    env_display = os.path.relpath(target_env, os.path.dirname(BASE_BACKEND))
+else:
+    load_dotenv(override=True)
+    env_display = "system environment"
+
+from sqlalchemy import create_engine, URL
+from sqlalchemy.orm import sessionmaker
+
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
+db_host = os.getenv("DB_HOST", "localhost")
+db_port = int(os.getenv("DB_PORT", "3306"))
+db_name = os.getenv("DB_NAME", "todo_app")
+db_ssl_env = os.getenv("DB_SSL", "").strip().lower()
+db_ssl_ca = os.getenv("DB_SSL_CA", "")
+
+use_ssl = db_ssl_env in ("true", "1", "yes") or (db_port == 4000 and db_ssl_env != "false")
+
+connect_args = {}
+if use_ssl:
+    import certifi
+    ca_path = db_ssl_ca
+    if not ca_path or not os.path.exists(ca_path):
+        ca_path = certifi.where()
+    connect_args["ssl"] = {
+        "ca": ca_path,
+        "check_hostname": True,
+    }
+
+db_url = URL.create(
+    drivername="mysql+pymysql",
+    username=db_user,
+    password=db_password,
+    host=db_host,
+    port=db_port,
+    database=db_name
+)
+
+engine = create_engine(
+    db_url,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30
+)
+
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
 from app.models.user import User
 from app.models.category import Category
 from app.models.task import Task
@@ -37,6 +101,9 @@ def seed_data():
     print("=" * 65)
     print("PLANOVA — SEEDING DEMO USERS AND STARTER WORKSPACE DATA")
     print("=" * 65)
+    print(f"Target Database : {db_name} on {db_host}:{db_port}")
+    print(f"Loaded Config   : {env_display}")
+    print(f"SSL / TLS       : {'YES (Verified)' if use_ssl else 'NO'}")
 
     db = SessionLocal()
     default_pwd = hash_password("password123")
@@ -54,7 +121,7 @@ def seed_data():
         ]
 
         created_users = {}
-        print("\n1. Seeding Users (Password: 'password123'):")
+        print("\n1. Seeding Users (Default password: 'password123'):")
         for m in team_members:
             user = db.query(User).filter(User.email == m["email"]).first()
             if not user:
@@ -144,14 +211,15 @@ def seed_data():
                     status=t_info["status"],
                     priority=t_info["priority"],
                     due_date=t_info["due_date"],
-                    due_time="17:00",
+                    due_time=time(17, 0),
+                    due_datetime=datetime.combine(t_info["due_date"], time(17, 0)),
                     timezone="UTC"
                 )
                 db.add(t)
                 db.commit()
                 db.refresh(t)
 
-                # Add sample subtask
+                # Add sample subtasks
                 db.add(Subtask(task_id=t.id, user_id=sarthak_user.id, title="Check schema migrations v2 and v3", is_completed=True, sort_order=1))
                 db.add(Subtask(task_id=t.id, user_id=sarthak_user.id, title="Confirm MySQL Workbench connection", is_completed=True, sort_order=2))
                 db.commit()
@@ -169,7 +237,8 @@ def seed_data():
                 instructions="1. Verify local server running.\n2. Review speaking points.\n3. Test assigning tasks in Admin Console.",
                 priority="High",
                 due_date=today + timedelta(days=3),
-                due_time="18:00",
+                due_time=time(18, 0),
+                due_datetime=datetime.combine(today + timedelta(days=3), time(18, 0)),
                 timezone="UTC",
                 checklist=[
                     {"item": "Check MySQL 13 tables", "completed": True},
@@ -206,21 +275,23 @@ def seed_data():
                 print(f"  [+] Assigned to: {recipient.name} ({recipient.email})")
 
         print("\n" + "=" * 65)
-        print("SEEDING COMPLETE! ALL WORKSPACES & USERS ARE NOW READY.")
+        print("SEEDING COMPLETE! ALL WORKSPACES & USERS ARE NOW READY IN TIDB.")
         print("=" * 65)
         print("\nSummary of Login Credentials:")
-        print("  Admin Login : admin@example.com   | Password: password123")
-        print("  Sarthak     : sarthak@planova.com | Password: password123")
-        print("  Rehan       : rehan@planova.com   | Password: password123")
+        print("  Admin Login : admin@example.com     | Password: password123")
+        print("  Sarthak     : sarthak@planova.com   | Password: password123")
+        print("  Rehan       : rehan@planova.com     | Password: password123")
         print("  Sanskruti   : sanskruti@planova.com | Password: password123")
         print("  Ishwari     : ishwari@planova.com   | Password: password123")
         print("  Sanyukta    : sanyukta@planova.com  | Password: password123")
         print("  Mohan       : mohan@planova.com     | Password: password123")
-        print("\nYour friend can now log in immediately and test all features!")
 
     except Exception as e:
         db.rollback()
-        print(f"[ERROR] Seeding failed: {e}")
+        safe_err = str(e)
+        if db_password and db_password in safe_err:
+            safe_err = safe_err.replace(db_password, "********")
+        print(f"[ERROR] Seeding failed: {safe_err}")
     finally:
         db.close()
 

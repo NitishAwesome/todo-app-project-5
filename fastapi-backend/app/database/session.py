@@ -27,9 +27,12 @@ use_ssl = db_ssl_env in ("true", "1", "yes") or (db_port == 4000 and db_ssl_env 
 connect_args = {}
 if use_ssl:
     import certifi
-    # Enforce verified TLS connection using certifi's Mozilla root CA bundle
+    ca_path = os.getenv("DB_SSL_CA")
+    if not ca_path or not os.path.exists(ca_path):
+        ca_path = certifi.where()
+    # Enforce verified TLS connection using CA bundle (certifi or explicit CA)
     connect_args["ssl"] = {
-        "ca": certifi.where(),
+        "ca": ca_path,
         "check_hostname": True,
     }
 

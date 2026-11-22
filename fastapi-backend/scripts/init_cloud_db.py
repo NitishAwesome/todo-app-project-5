@@ -7,28 +7,53 @@ Features:
 - Version-tracked: uses `schema_migrations` table to prevent re-execution.
 - TiDB Trigger Compatibility: detects and documents unsupported MySQL triggers,
   logging explicit explanations and application-level equivalence.
-- Verified TLS: uses certifi when DB_SSL=true or port 4000.
+- Verified TLS: uses certifi or custom CA (e.g. isrgrootx1.pem) when DB_SSL=true or port 4000.
+- Isolated Environment: accepts `--env` flag (e.g. --env .env.tidb) to keep local MySQL untouched.
+- Secret Safe: never outputs passwords or raw credential strings.
 """
 
 import os
 import sys
 import re
+import argparse
 from datetime import datetime
 
 # Add fastapi-backend root to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+BASE_BACKEND = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if BASE_BACKEND not in sys.path:
+    sys.path.append(BASE_BACKEND)
 
 from dotenv import load_dotenv
 
-# Load environment configuration
-env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.env"))
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-else:
-    load_dotenv()
+# Parse CLI arguments
+parser = argparse.ArgumentParser(description="Planova Cloud & Local Database Initializer")
+parser.add_argument("--env", type=str, default=None, help="Path to environment file (e.g. .env.tidb)")
+args, _ = parser.parse_known_args()
 
-from sqlalchemy import text
-from app.database.session import SessionLocal, engine
+# Determine environment file to load
+target_env = None
+if args.env:
+    if os.path.isabs(args.env):
+        target_env = args.env
+    else:
+        target_env = os.path.abspath(os.path.join(os.getcwd(), args.env))
+else:
+    tidb_candidate = os.path.join(BASE_BACKEND, ".env.tidb")
+    local_candidate = os.path.join(BASE_BACKEND, ".env")
+    if os.path.exists(tidb_candidate):
+        target_env = tidb_candidate
+    elif os.path.exists(local_candidate):
+        target_env = local_candidate
+
+if target_env and os.path.exists(target_env):
+    load_dotenv(target_env, override=True)
+    env_display = os.path.relpath(target_env, os.path.dirname(BASE_BACKEND))
+else:
+    load_dotenv(override=True)
+    env_display = "system environment"
+
+from sqlalchemy import create_engine, URL, text
+from sqlalchemy.orm import sessionmaker
 
 
 def split_sql_statements(sql_text: str) -> list[str]:
@@ -36,7 +61,6 @@ def split_sql_statements(sql_text: str) -> list[str]:
     Parses SQL text into discrete statements, stripping line comments
     and block comments while preserving semicolons inside quotes.
     """
-    # Remove block comments /* ... */
     sql_clean = re.sub(r"/\*.*?\*/", "", sql_text, flags=re.DOTALL)
 
     statements = []
@@ -44,10 +68,8 @@ def split_sql_statements(sql_text: str) -> list[str]:
 
     for line in sql_clean.splitlines():
         stripped = line.strip()
-        # Skip pure comment lines
         if stripped.startswith("--") or stripped.startswith("#"):
             continue
-        # Strip inline comments if they exist
         if "-- " in line:
             line = line.split("-- ")[0]
 
@@ -55,7 +77,6 @@ def split_sql_statements(sql_text: str) -> list[str]:
             current_stmt.append(line)
             if line.strip().endswith(";"):
                 full_stmt = "\n".join(current_stmt).strip()
-                # Remove trailing semicolon
                 if full_stmt.endswith(";"):
                     full_stmt = full_stmt[:-1].strip()
                 if full_stmt:
@@ -102,14 +123,17 @@ def record_migration(db, version: str, description: str):
     db.commit()
 
 
-def check_tidb_engine(db) -> bool:
-    """Detects whether the target database is running on PingCAP TiDB."""
+def check_tidb_engine(db) -> tuple[bool, str]:
+    """Detects whether the target database is PingCAP TiDB."""
     try:
         res = db.execute(text("SELECT tidb_version()")).fetchone()
-        return res is not None
+        if res and res[0]:
+            first_line = res[0].strip().split("\n")[0]
+            return True, first_line
+        return True, "TiDB Cloud"
     except Exception:
         db.rollback()
-        return False
+        return False, "Standard MySQL / MariaDB"
 
 
 def run_cloud_init():
@@ -118,30 +142,93 @@ def run_cloud_init():
     print("=" * 70)
 
     db_host = os.getenv("DB_HOST", "localhost")
-    db_port = os.getenv("DB_PORT", "3306")
+    db_port = int(os.getenv("DB_PORT", "3306"))
+    db_user = os.getenv("DB_USER", "")
+    db_password = os.getenv("DB_PASSWORD", "")
     db_name = os.getenv("DB_NAME", "todo_app")
-    db_ssl = os.getenv("DB_SSL", "false")
+    db_ssl_env = os.getenv("DB_SSL", "").strip().lower()
+    db_ssl_ca = os.getenv("DB_SSL_CA", "")
 
+    use_ssl = db_ssl_env in ("true", "1", "yes") or (db_port == 4000 and db_ssl_env != "false")
+
+    print(f"Loaded Config   : {env_display}")
     print(f"Target Database : {db_name} on {db_host}:{db_port}")
-    print(f"SSL / TLS Active: {db_ssl} (Port {db_port})")
+    print(f"Database User   : {db_user}")
 
-    db = SessionLocal()
-    try:
-        # Step 0: Test connection & check engine type
-        is_tidb = check_tidb_engine(db)
-        if is_tidb:
-            print("[INFO] Engine Detected: TiDB Cloud Serverless (Distributed MySQL 8.0 mode)")
+    connect_args = {}
+    if use_ssl:
+        import certifi
+        ca_path = db_ssl_ca
+        if not ca_path or not os.path.exists(ca_path):
+            ca_path = certifi.where()
+            ca_display = f"certifi bundle ({os.path.basename(ca_path)})"
         else:
-            print("[INFO] Engine Detected: Standard MySQL / MariaDB")
+            ca_display = f"custom verified CA ({ca_path})"
+        print(f"SSL / TLS Active: YES [check_hostname=True, CA={ca_display}]")
+        connect_args["ssl"] = {
+            "ca": ca_path,
+            "check_hostname": True,
+        }
+    else:
+        print(f"SSL / TLS Active: NO (Plain TCP)")
 
-        # Step 1: Ensure migration tracking table
+    # Build connection URL safely
+    db_url = URL.create(
+        drivername="mysql+pymysql",
+        username=db_user,
+        password=db_password,
+        host=db_host,
+        port=db_port,
+        database=db_name
+    )
+
+    print("\n[STEP 1/4] Testing live database connection...")
+    try:
+        engine = create_engine(
+            db_url,
+            connect_args=connect_args,
+            pool_pre_ping=True,
+            pool_recycle=300,
+            pool_size=5,
+            max_overflow=10,
+            pool_timeout=30
+        )
+        with engine.connect() as test_conn:
+            test_conn.execute(text("SELECT 1"))
+        print("[SUCCESS] Live connection established successfully!")
+    except Exception as conn_err:
+        err_msg = str(conn_err)
+        if db_password and db_password in err_msg:
+            err_msg = err_msg.replace(db_password, "********")
+        print(f"\n[ERROR] Connection failed: {err_msg}")
+        if "Access denied" in err_msg:
+            print("\n[GUIDANCE] Authentication failed. Please ensure:")
+            print("  1. The password in .env.tidb is your newly reset TiDB Cloud password.")
+            print("  2. The username in .env.tidb matches the TiDB user format: <prefix>.root")
+            print("  3. There are no accidental spaces around the password in .env.tidb.")
+        elif "certificate" in err_msg.lower() or "ssl" in err_msg.lower():
+            print("\n[GUIDANCE] TLS/SSL certificate verification error.")
+            print("  Verify that DB_SSL_CA points to the correct ISRG Root X1 certificate.")
+        sys.exit(1)
+
+    SessionMaker = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    db = SessionMaker()
+
+    try:
+        # Step 2: Detect Engine & Capabilities
+        print("\n[STEP 2/4] Inspecting database engine capabilities...")
+        is_tidb, engine_desc = check_tidb_engine(db)
+        print(f"[INFO] Engine Identified: {engine_desc}")
+        if is_tidb:
+            print("[INFO] PingCAP TiDB Serverless detected. Trigger emulation active at application layer.")
+
+        # Ensure migration tracking table
         ensure_migration_table(db)
-
-        # Existing tables check
         existing_tables = [t[0] for t in db.execute(text("SHOW TABLES")).fetchall()]
-        print(f"[INFO] Existing tables count before run: {len(existing_tables)}")
+        print(f"[INFO] Existing tables count before execution: {len(existing_tables)}")
 
-        # Define migration sequence
+        # Step 3: Run Baseline Schema + Migrations
+        print("\n[STEP 3/4] Applying schema migrations in sequence...")
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
         migration_stages = [
             {
@@ -167,14 +254,14 @@ def run_cloud_init():
             desc = stage["desc"]
             file_name = os.path.basename(file_path)
 
-            print(f"\n--- Stage: {version} ({file_name}) ---")
+            print(f"\n--- Migration Stage: {version} ({file_name}) ---")
 
             if is_migration_applied(db, version):
-                print(f"[SKIP] Version '{version}' is already recorded in schema_migrations.")
+                print(f"[SKIP] Version '{version}' was already applied previously.")
                 continue
 
             if not os.path.exists(file_path):
-                print(f"[ERROR] Migration file not found: {file_path}")
+                print(f"[FATAL] Migration script file not found: {file_path}")
                 sys.exit(1)
 
             with open(file_path, "r", encoding="utf-8") as f:
@@ -184,12 +271,12 @@ def run_cloud_init():
             executed = 0
 
             for stmt in statements:
-                # Check for database creation statement (skip if already inside target database)
+                # Skip CREATE DATABASE or USE statements when already connected to target database
                 if re.match(r"^CREATE\s+DATABASE", stmt, re.IGNORECASE):
-                    print("  [SKIP] Skipping CREATE DATABASE statement (already connected to target database).")
+                    print("  [SKIP] CREATE DATABASE statement (already connected).")
                     continue
                 if re.match(r"^USE\s+", stmt, re.IGNORECASE):
-                    print("  [SKIP] Skipping USE statement.")
+                    print("  [SKIP] USE statement.")
                     continue
 
                 # Handle triggers on TiDB explicitly
@@ -208,9 +295,9 @@ def run_cloud_init():
                     db.commit()
                     executed += 1
                 except Exception as stmt_err:
-                    err_msg = str(stmt_err).lower()
+                    err_lower = str(stmt_err).lower()
                     # Idempotency checks for re-run safety
-                    if any(phrase in err_msg for phrase in [
+                    if any(phrase in err_lower for phrase in [
                         "duplicate column",
                         "duplicate key",
                         "duplicate foreign key",
@@ -221,22 +308,25 @@ def run_cloud_init():
                         "1050",  # Table already exists
                     ]):
                         db.rollback()
-                        print(f"  [IDEMPOTENT SKIP] Schema element already exists.")
+                        print("  [IDEMPOTENT SKIP] Schema element already exists.")
                         executed += 1
-                    elif is_trigger_stmt and ("does not support triggers" in err_msg or "1105" in err_msg):
+                    elif is_trigger_stmt and ("does not support triggers" in err_lower or "1105" in err_lower):
                         db.rollback()
                         print(f"  [INFO] Omitted unsupported trigger on target engine ({type(stmt_err).__name__}).")
                     else:
                         db.rollback()
-                        print(f"[ERROR] Fatal schema failure during statement:\n{stmt}\nError: {stmt_err}")
+                        safe_stmt_err = str(stmt_err)
+                        if db_password and db_password in safe_stmt_err:
+                            safe_stmt_err = safe_stmt_err.replace(db_password, "********")
+                        print(f"[ERROR] Statement execution failed:\n{stmt}\nError: {safe_stmt_err}")
                         sys.exit(1)
 
-            # Record migration version in schema_migrations
             record_migration(db, version, desc)
-            print(f"[OK] Successfully applied '{version}' ({executed} statements processed).")
+            print(f"[OK] Applied '{version}' successfully ({executed} statements processed).")
 
-        # Step 2: Final Verification & Schema Audit
-        print("\n" + "=" * 70)
+        # Step 4: Verification and Table Audit
+        print("\n[STEP 4/4] Verifying all application tables & schema extensions...")
+        print("=" * 70)
         print("DATABASE SCHEMA AUDIT & VERIFICATION")
         print("=" * 70)
 
@@ -258,7 +348,7 @@ def run_cloud_init():
             "users",
         ]
 
-        print(f"Total Tables in Database: {len(final_tables)}")
+        print(f"Total Tables Discovered: {len(final_tables)}")
         missing_tables = [t for t in expected_tables if t not in final_tables]
 
         for t in sorted(final_tables):
@@ -268,10 +358,10 @@ def run_cloud_init():
         if missing_tables:
             print(f"\n[ERROR] Missing required tables: {missing_tables}")
             sys.exit(1)
-        else:
-            print("\n[SUCCESS] All 14 expected tables (13 application + 1 migration tracking) are verified!")
 
-        # Step 3: Column verification for altered tables
+        print("\n[SUCCESS] All 14 tables (13 application + 1 migration tracking) verified!")
+
+        # Verify altered columns
         task_cols = [c[0] for c in db.execute(text("DESCRIBE tasks")).fetchall()]
         print("\nChecking exact deadline fields on 'tasks':")
         for col in ["due_time", "due_datetime", "timezone"]:
@@ -290,7 +380,10 @@ def run_cloud_init():
 
     except Exception as e:
         db.rollback()
-        print(f"[FATAL] Initialization failed: {e}")
+        err_str = str(e)
+        if db_password and db_password in err_str:
+            err_str = err_str.replace(db_password, "********")
+        print(f"[FATAL] Initialization aborted: {err_str}")
         sys.exit(1)
     finally:
         db.close()

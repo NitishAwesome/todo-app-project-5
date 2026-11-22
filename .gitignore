@@ -16,6 +16,9 @@ out/
 .env.local
 .env.*.local
 *.env
+.env.tidb
+.env.cloud
+.env.*
 
 # Virtual Environment
 .venv/
