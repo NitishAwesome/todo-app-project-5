@@ -6,6 +6,7 @@ from app.dependencies.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.models.category import Category
+from app.models.task import Task
 from app.schemas.category import CategoryCreate, CategoryResponse
 
 router = APIRouter(
@@ -73,3 +74,34 @@ def create_category(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Failed to create category.")
+
+
+@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Deletes a user category with application-level disassociation.
+    Replaces MySQL trigger `trg_categories_before_delete` to ensure identical,
+    distributed-safe behavior across both MySQL and TiDB Cloud.
+    """
+    cat = db.query(Category).filter(
+        Category.id == category_id,
+        Category.user_id == current_user.id
+    ).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found.")
+
+    # Application-level equivalent of trg_categories_before_delete:
+    # Unlinks all tasks from this category before deletion without deleting the tasks
+    db.query(Task).filter(
+        Task.category_id == category_id,
+        Task.user_id == current_user.id
+    ).update({"category_id": None}, synchronize_session="fetch")
+
+    db.delete(cat)
+    db.commit()
+    return None
+
