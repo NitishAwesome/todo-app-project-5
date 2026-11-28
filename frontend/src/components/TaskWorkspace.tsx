@@ -1,3 +1,4 @@
+import DuplicateFinderCard from "./DuplicateFinderCard";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { taskApi, categoryApi } from "../taskAPI";
 import { tagApi } from "../productivityAPI";
@@ -288,6 +289,8 @@ export default function TaskWorkspace({
           )}
         </div>
       ) : (
+        <>
+        <DuplicateFinderCard tasks={tasks} onDelete={handleDelete} />
         <ul className="planova-tasks-list" aria-label="Tasks list">
           {visibleTasks.map((task) => (
             <TaskCard
@@ -300,6 +303,7 @@ export default function TaskWorkspace({
             />
           ))}
         </ul>
+        </>
       )}
     </div>
   );
